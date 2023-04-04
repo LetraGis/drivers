@@ -55,7 +55,7 @@ typedef enum
 	analog,
 } portMode;
 
-typedef struct
+typedef struct RCC_AHB1ENR_Type_Tag
 {
 	uint32 GPIOAEN 		: 1;
 	uint32 GPIOBEN 		: 1;
@@ -78,7 +78,7 @@ typedef struct
 	uint32 RESERVED5 	: 1;
 } RCC_AHB1ENR_Type;
 
-typedef struct
+typedef struct GPIOX_ODR_Type_Tag
 {
 	uint16 pin0 	: 1;
 	uint16 pin1 	: 1;
@@ -98,7 +98,7 @@ typedef struct
 	uint16 pin15 	: 1;
 } GPIOX_ODR_Type;
 
-typedef struct
+typedef struct GPIOX_IDR_Type_Tag
 {
 	uint16 pin0 	: 1;
 	uint16 pin1 	: 1;
@@ -118,7 +118,7 @@ typedef struct
 	uint16 pin15 	: 1;
 } GPIOX_IDR_Type;
 
-typedef struct
+typedef struct GPIOX_MODER_Type_Tag
 {
 	uint32 pin0 	: 2;
 	uint32 pin1 	: 2;
@@ -138,7 +138,7 @@ typedef struct
 	uint32 pin15 	: 2;
 } GPIOX_MODER_Type;
 
-typedef struct
+typedef struct GPIOX_PUPDR_Type_Tag
 {
 	uint32 pin0 	: 2;
 	uint32 pin1 	: 2;
@@ -158,11 +158,11 @@ typedef struct
 	uint32 pin15 	: 2;
 } GPIOX_PUPDR_Type;
 
-extern volatile RCC_AHB1ENR_Type * const RCC_AHB1ENR;
-extern volatile GPIOX_MODER_Type * const GPIOA_MODER;
-extern volatile GPIOX_MODER_Type * const GPIOC_MODER;
-extern volatile GPIOX_ODR_Type * const GPIOA_ODR;
-extern volatile GPIOX_IDR_Type * const GPIOC_IDR;
+#define RCC_AHB1ENR		((RCC_AHB1ENR_Type *)(RCC_AHB1ENR_ADDRESS))
+#define GPIOA_MODER 	((GPIOX_MODER_Type *)(GPIOX_REG_BASE_ADDRESS + (porta * 0x400u)))
+#define GPIOC_MODER 	((GPIOX_MODER_Type *)(GPIOX_REG_BASE_ADDRESS + (portc * 0x400u)))
+#define GPIOA_ODR 		((GPIOX_ODR_Type *)(GPIOX_REG_BASE_ADDRESS + (porta * 0x400u) + 0x14u))
+#define GPIOC_IDR 		((GPIOX_IDR_Type *)(GPIOX_REG_BASE_ADDRESS + (portc * 0x400u) + 0x10u))
 
 /******************************************************************************
 End Of File
