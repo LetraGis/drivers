@@ -1,8 +1,8 @@
 /*
  * gpio.h
  *
- *  Created on: Jun 1, 2022
- *      Author: LetraGis
+ *  Created on: Jun 3, 2022
+ *      Author: LARL
  */
 
 #ifndef GPIO_H_
@@ -25,26 +25,16 @@ DEFINITION OF CONSTANTS
 #define LOW (0)
 #define OK (0u)
 #define N_OK (1u)
-#define RET_ERROR (255u)
-
-/* Maximum number of ports */
-#define PORT_NUM_MAX (8u)
-/* Maximum number of pin modes */
-#define PIN_MODE_MAX (4u)
-/* Maximum number of pins per port */
-#define PIN_NUM_MAX (16u)
-/* Maximum number of pull up/down configurations */
-#define PULL_MODE_MAX (3u)
+#define TRUE (1u)
+#define FALSE (0u)
 
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
-typedef enum
-{
-	low = 0,
-	high = 1,
-} pinState;
 
+typedef uint32_t 	uint32;
+typedef uint16_t 	uint16;
+typedef uint8_t 	uint8;
 typedef enum
 {
 	porta = 0,
@@ -59,77 +49,120 @@ typedef enum
 
 typedef enum
 {
-	pin0 = 0,
-	pin1,
-	pin2,
-	pin3,
-	pin4,
-	pin5,
-	pin6,
-	pin7,
-	pin8,
-	pin9,
-	pin10,
-	pin11,
-	pin12,
-	pin13,
-	pin14,
-	pin15,
-} pinNumber;
-
-typedef enum
-{
-	none = 0,
-	pullup,
-	pulldown,
-} pullMode;
-
-typedef enum
-{
 	input = 0,
 	output,
 	alternate,
 	analog,
 } portMode;
 
-/******************************************************************************
-DECLARATION OF VARIABLES
-******************************************************************************/
+typedef struct
+{
+	uint32 GPIOAEN 		: 1;
+	uint32 GPIOBEN 		: 1;
+	uint32 GPIOCEN 		: 1;
+	uint32 GPIODEN 		: 1;
+	uint32 GPIOEEN 		: 1;
+	uint32 GPIOFEN 		: 1;
+	uint32 GPIOGEN 		: 1;
+	uint32 GPIOHEN 		: 1;
+	uint32 RESERVED1 	: 4;
+	uint32 CRCEN 		: 1;
+	uint32 RESERVED2 	: 5;
+	uint32 BKPSRAMEN 	: 1;
+	uint32 RESERVED3 	: 2;
+	uint32 DMA1EN 		: 1;
+	uint32 DMA2EN 		: 1;
+	uint32 RESERVED4 	: 6;
+	uint32 OTGHSEN 		: 1;
+	uint32 OTGHSULPIEN 	: 1;
+	uint32 RESERVED5 	: 1;
+} RCC_AHB1ENR_Type;
 
-/******************************************************************************
-DECLARATION OF CONSTANT DATA
-******************************************************************************/
+typedef struct
+{
+	uint16 pin0 	: 1;
+	uint16 pin1 	: 1;
+	uint16 pin2 	: 1;
+	uint16 pin3 	: 1;
+	uint16 pin4 	: 1;
+	uint16 pin5 	: 1;
+	uint16 pin6 	: 1;
+	uint16 pin7 	: 1;
+	uint16 pin8 	: 1;
+	uint16 pin9 	: 1;
+	uint16 pin10 	: 1;
+	uint16 pin11 	: 1;
+	uint16 pin12 	: 1;
+	uint16 pin13 	: 1;
+	uint16 pin14 	: 1;
+	uint16 pin15 	: 1;
+} GPIOX_ODR_Type;
 
-/******************************************************************************
-DECLARATION OF FUNCTIONS
-******************************************************************************/
+typedef struct
+{
+	uint16 pin0 	: 1;
+	uint16 pin1 	: 1;
+	uint16 pin2 	: 1;
+	uint16 pin3 	: 1;
+	uint16 pin4 	: 1;
+	uint16 pin5 	: 1;
+	uint16 pin6 	: 1;
+	uint16 pin7 	: 1;
+	uint16 pin8 	: 1;
+	uint16 pin9 	: 1;
+	uint16 pin10 	: 1;
+	uint16 pin11 	: 1;
+	uint16 pin12 	: 1;
+	uint16 pin13 	: 1;
+	uint16 pin14 	: 1;
+	uint16 pin15 	: 1;
+} GPIOX_IDR_Type;
 
-void Gpio_Init(void);
-void Gpio_InitCallback(void); /* Needs to be defined by the user to initialize
-								 GPIO ports, set pin modes, etc. */
-uint8_t Gpio_PortInit(portNumber port);
-uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode);
-uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
-uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
-uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state);
-uint8_t Gpio_GetPinStateVal(portNumber port, pinNumber pin);
-uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode);
+typedef struct
+{
+	uint32 pin0 	: 2;
+	uint32 pin1 	: 2;
+	uint32 pin2 	: 2;
+	uint32 pin3 	: 2;
+	uint32 pin4 	: 2;
+	uint32 pin5 	: 2;
+	uint32 pin6 	: 2;
+	uint32 pin7 	: 2;
+	uint32 pin8 	: 2;
+	uint32 pin9 	: 2;
+	uint32 pin10 	: 2;
+	uint32 pin11 	: 2;
+	uint32 pin12 	: 2;
+	uint32 pin13 	: 2;
+	uint32 pin14 	: 2;
+	uint32 pin15 	: 2;
+} GPIOX_MODER_Type;
 
-/******************************************************************************
-DECLARATION OF FUNCTION-LIKE MACROS
-******************************************************************************/
-#define RCC_AHB1ENR (*(volatile uint32_t *const)(RCC_AHB1ENR_ADDRESS))
-#define GPIOX_MODER(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u)))
+typedef struct
+{
+	uint32 pin0 	: 2;
+	uint32 pin1 	: 2;
+	uint32 pin2 	: 2;
+	uint32 pin3 	: 2;
+	uint32 pin4 	: 2;
+	uint32 pin5 	: 2;
+	uint32 pin6 	: 2;
+	uint32 pin7 	: 2;
+	uint32 pin8 	: 2;
+	uint32 pin9 	: 2;
+	uint32 pin10 	: 2;
+	uint32 pin11 	: 2;
+	uint32 pin12 	: 2;
+	uint32 pin13 	: 2;
+	uint32 pin14 	: 2;
+	uint32 pin15 	: 2;
+} GPIOX_PUPDR_Type;
 
-#define GPIOX_PUPDR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x0Cu))
-
-#define GPIOX_IDR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x10u))
-
-#define GPIOX_ODR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x14u))
+extern volatile RCC_AHB1ENR_Type * const RCC_AHB1ENR;
+extern volatile GPIOX_MODER_Type * const GPIOA_MODER;
+extern volatile GPIOX_MODER_Type * const GPIOC_MODER;
+extern volatile GPIOX_ODR_Type * const GPIOA_ODR;
+extern volatile GPIOX_IDR_Type * const GPIOC_IDR;
 
 /******************************************************************************
 End Of File
