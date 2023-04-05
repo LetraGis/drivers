@@ -2,6 +2,6 @@
  * gpio.c
  *
  *  Created on: Jun 3, 2022
- *      Author: LARL
+ *      Author: LetraGis
  */
 
