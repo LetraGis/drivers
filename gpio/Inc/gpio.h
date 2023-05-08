@@ -12,37 +12,50 @@
 EXTERNAL DEPENDENCIES
 ******************************************************************************/
 #include <stdint.h>
+#include "stm32f446xx.h"
 
 /******************************************************************************
 DEFINITION OF CONSTANTS
 ******************************************************************************/
-/* RCC register to enable GPIO ports */
-#define RCC_AHB1ENR_ADDRESS 0x40023830u
+/* RCC AHB1 register offset */
+#define RCC_AHB1ENR_OFFSET 	(0x30u)
+/* RCC AHB1 register (to enable GPIO ports) */
+#define RCC_AHB1ENR_BASE 	(RCC_BASE + RCC_AHB1ENR_OFFSET)
 /* GPIO base register address */
-#define GPIOX_REG_BASE_ADDRESS 0x40020000u
+#define GPIOX_BASE 			(GPIOA_BASE)
 
-#define HIGH (1u)
-#define LOW (0)
-#define OK (0u)
-#define N_OK (1u)
-#define RET_ERROR (255u)
+/* GPIO offset from one GPIO port to another */
+#define GPIOX_OFFSET		(0x400u)
+/* GPIO PUPDR offset */
+#define GPIO_PUPDR_OFFSET	(0x0Cu)
+/* GPIO IDR offset */
+#define GPIO_IDR_OFFSET		(0x10u)
+/* GPIO ODR offset */
+#define GPIO_ODR_OFFSET		(0x14u)
+
+/* General defines */
+#define GPIO_HIGH 		(1u)
+#define GPIO_LOW 		(0u)
+#define OK 				(0u)
+#define N_OK 			(1u)
+#define RET_ERROR 		(255u)
 
 /* Maximum number of ports */
-#define PORT_NUM_MAX (8u)
+#define PORT_NUM_MAX 	(8u)
 /* Maximum number of pin modes */
-#define PIN_MODE_MAX (4u)
+#define PIN_MODE_MAX 	(4u)
 /* Maximum number of pins per port */
-#define PIN_NUM_MAX (16u)
+#define PIN_NUM_MAX 	(16u)
 /* Maximum number of pull up/down configurations */
-#define PULL_MODE_MAX (3u)
+#define PULL_MODE_MAX 	(3u)
 
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
 typedef enum
 {
-	low = 0,
-	high = 1,
+	low 	= 0,
+	high 	= 1,
 } pinState;
 
 typedef enum
@@ -118,18 +131,18 @@ uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode);
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
 ******************************************************************************/
-#define RCC_AHB1ENR (*(volatile uint32_t *const)(RCC_AHB1ENR_ADDRESS))
-#define GPIOX_MODER(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u)))
+#define RCC_AHB1ENR (*(volatile uint32_t *const)(RCC_AHB1ENR_BASE))
+#define GPIOX_MODER(port) (*(volatile uint32_t *const)(GPIOX_BASE \
+						   + (port * GPIOX_OFFSET)))
 
-#define GPIOX_PUPDR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x0Cu))
+#define GPIOX_PUPDR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
+						   + (port * GPIOX_OFFSET) + GPIO_PUPDR_OFFSET))
 
-#define GPIOX_IDR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x10u))
+#define GPIOX_IDR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
+						   + (port * GPIOX_OFFSET) + GPIO_IDR_OFFSET))
 
-#define GPIOX_ODR(port) (*(volatile uint32_t *const)(GPIOX_REG_BASE_ADDRESS \
-						   + (port * 0x400u) + 0x14u))
+#define GPIOX_ODR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
+						   + (port * GPIOX_OFFSET) + GPIO_ODR_OFFSET))
 
 /******************************************************************************
 End Of File
