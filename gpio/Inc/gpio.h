@@ -17,21 +17,31 @@ EXTERNAL DEPENDENCIES
 /******************************************************************************
 DEFINITION OF CONSTANTS
 ******************************************************************************/
-/* RCC AHB1 register offset */
-#define RCC_AHB1ENR_OFFSET 	(0x30u)
-/* RCC AHB1 register (to enable GPIO ports) */
-#define RCC_AHB1ENR_BASE 	(RCC_BASE + RCC_AHB1ENR_OFFSET)
 /* GPIO base register address */
 #define GPIOX_BASE 			(GPIOA_BASE)
 
 /* GPIO offset from one GPIO port to another */
 #define GPIOX_OFFSET		(0x400u)
+/* GPIO MODER offset */
+#define GPIO_MODER_OFFSET	(0x00u)
+/* GPIO OTYPER offset */
+#define GPIO_OTYPER_OFFSET	(0x04u)
+/* GPIO OSPEEDR offset */
+#define GPIO_OSPEEDR_OFFSET	(0x08u)
 /* GPIO PUPDR offset */
 #define GPIO_PUPDR_OFFSET	(0x0Cu)
 /* GPIO IDR offset */
 #define GPIO_IDR_OFFSET		(0x10u)
 /* GPIO ODR offset */
 #define GPIO_ODR_OFFSET		(0x14u)
+/* GPIO BSRR offset */
+#define GPIO_BSRR_OFFSET	(0x18u)
+/* GPIO LCK offset */
+#define GPIO_LCKR_OFFSET	(0x1Cu)
+/* GPIO AFRL offset */
+#define GPIO_AFRL_OFFSET	(0x20u)
+/* GPIO AFRH offset */
+#define GPIO_AFRH_OFFSET	(0x24u)
 
 /* General defines */
 #define GPIO_HIGH 		(1u)
@@ -41,23 +51,25 @@ DEFINITION OF CONSTANTS
 #define RET_ERROR 		(255u)
 
 /* Maximum number of ports */
-#define PORT_NUM_MAX 	(8u)
-/* Maximum number of pin modes */
-#define PIN_MODE_MAX 	(4u)
+#define GPIO_PORT_NUM_MAX 		(8u)
 /* Maximum number of pins per port */
-#define PIN_NUM_MAX 	(16u)
+#define GPIO_PIN_NUM_MAX 		(16u)
 /* Maximum number of pull up/down configurations */
-#define PULL_MODE_MAX 	(3u)
+#define GPIO_PULL_MODE_MAX 		(3u)
+/* Maximum number of pin modes */
+#define GPIO_PIN_MODE_MAX 		(4u)
+/* Maximum number of output type modes */
+#define GPIO_OTYPE_MODE_MAX		(2u)
+/* Maximum number of output speed modes */
+#define GPIO_OSPEED_MODE_MAX 	(4u)
+/* Maximum number of internal resistor modes */
+#define GPIO_RES_MODE_MAX		(3u)
+/* Maximum number of pin states */
+#define GPIO_PIN_STATE_MAX		(2u)
 
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
-typedef enum
-{
-	low 	= 0,
-	high 	= 1,
-} pinState;
-
 typedef enum
 {
 	porta = 0,
@@ -92,6 +104,28 @@ typedef enum
 
 typedef enum
 {
+	input = 0,
+	output,
+	alternate,
+	analog,
+} portMode;
+
+typedef enum
+{
+	pushpull = 0,
+	opendrain,
+} outputType;
+
+typedef enum
+{
+	lowspeed = 0,
+	mediumspeed,
+	fast_speed,
+	high_speed,
+} outputSpeed;
+
+typedef enum
+{
 	none = 0,
 	pullup,
 	pulldown,
@@ -99,11 +133,29 @@ typedef enum
 
 typedef enum
 {
-	input = 0,
-	output,
-	alternate,
-	analog,
-} portMode;
+	low 	= 0,
+	high 	= 1,
+} pinState;
+
+typedef enum
+{
+	altfun0 = 0,
+	altfun1,
+	altfun2,
+	altfun3,
+	altfun4,
+	altfun5,
+	altfun6,
+	altfun7,
+	altfun8,
+	altfun9,
+	altfun10,
+	altfun11,
+	altfun12,
+	altfun13,
+	altfun14,
+	altfun15,
+} altFunction;
 
 /******************************************************************************
 DECLARATION OF VARIABLES
@@ -122,27 +174,47 @@ void Gpio_InitCallback(void); /* Needs to be defined by the user to initialize
 								 GPIO ports, set pin modes, etc. */
 uint8_t Gpio_PortInit(portNumber port);
 uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode);
+uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type);
+uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed);
+uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode);
+uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state);
+pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin);
 uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
 uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
-uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state);
-uint8_t Gpio_GetPinStateVal(portNumber port, pinNumber pin);
-uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode);
 
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
 ******************************************************************************/
-#define RCC_AHB1ENR (*(volatile uint32_t *const)(RCC_AHB1ENR_BASE))
-#define GPIOX_MODER(port) (*(volatile uint32_t *const)(GPIOX_BASE \
-						   + (port * GPIOX_OFFSET)))
+/*!****************************************************************************
+ * @brief			Macro to access all GPIO registers based on offsets.
+ * @details		   	Using this macro we can easily access GPIO registers based
+ * 					on the provided port and offset between registers.
+ ******************************************************************************/		
+#define GPIOX_REG(port, offset)		(*(volatile uint32_t *const)(GPIOX_BASE \
+						   			+ (port * GPIOX_OFFSET) + offset))
 
-#define GPIOX_PUPDR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
-						   + (port * GPIOX_OFFSET) + GPIO_PUPDR_OFFSET))
-
-#define GPIOX_IDR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
-						   + (port * GPIOX_OFFSET) + GPIO_IDR_OFFSET))
-
-#define GPIOX_ODR(port) (*(volatile uint32_t *const)(GPIOX_BASE \
-						   + (port * GPIOX_OFFSET) + GPIO_ODR_OFFSET))
+/* Mode Register, configures pin as: in/out/alternate/analog */
+#define GPIOX_MODER(port) 		GPIOX_REG(port, GPIO_MODER_OFFSET)
+/* Output Type Register, configures output pin as: push-pull/open-drain */
+#define GPIOX_OTYPER(port)		GPIOX_REG(port, GPIO_OTYPER_OFFSET)
+/* Output Speed Register, configures pin speed as: low, med, fast, highspeed */
+#define GPIOX_OSPEEDR(port)		GPIOX_REG(port, GPIO_OSPEEDR_OFFSET)
+/* Pull-up Pull-down Register, configures pin internal resistors */
+#define GPIOX_PUPDR(port)		GPIOX_REG(port, GPIO_PUPDR_OFFSET)
+/* Input Data Register, reads from port */
+#define GPIOX_IDR(port)			GPIOX_REG(port, GPIO_IDR_OFFSET)
+/* Output Data Register, writes to port */
+#define GPIOX_ODR(port)			GPIOX_REG(port, GPIO_ODR_OFFSET)
+/* Output Data Register, writes to port */
+#define GPIOX_ODR(port)			GPIOX_REG(port, GPIO_ODR_OFFSET)
+/* Bit Set Reset Register, for atomic bit set/reset */
+#define GPIOX_BSSR(port)		GPIOX_REG(port, GPIO_BSSR_OFFSET)
+/* Configuration Lock Register, for locking GPIO configuration */
+#define GPIOX_LCKR(port)		GPIOX_REG(port, GPIO_LCKR_OFFSET)
+/* Alternate Function Register Low, configures alt function, pin1-pin7 */
+#define GPIOX_AFRL(port)		GPIOX_REG(port, GPIO_AFRL_OFFSET)
+/* Alternate Function Register High, configures alt function, pin8-pin15 */
+#define GPIOX_AFRH(port)		GPIOX_REG(port, GPIO_AFRH_OFFSET)
 
 /******************************************************************************
 End Of File

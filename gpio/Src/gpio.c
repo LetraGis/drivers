@@ -71,9 +71,9 @@ uint8_t Gpio_PortInit(portNumber port)
 {
 	uint8_t retVal = N_OK;
 	/* GPIO port enable */
-	if(port < PORT_NUM_MAX)
+	if(port < GPIO_PORT_NUM_MAX)
 	{
-		RCC_AHB1ENR |= (1u << port);
+		RCC->AHB1ENR |= (1u << port);
 		retVal = OK;
 	}
 	return (retVal);
@@ -91,7 +91,7 @@ uint8_t Gpio_PortInit(portNumber port)
 uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode)
 {
 	uint8_t retVal = N_OK;
-	if((port < PORT_NUM_MAX) && (mode < PIN_MODE_MAX ) && (pin < PIN_NUM_MAX))
+	if((port < GPIO_PORT_NUM_MAX) && (mode < GPIO_PIN_MODE_MAX ) && (pin < GPIO_PIN_NUM_MAX))
 	{
 		/* Clear bits before setting them to mode */
 		GPIOX_MODER(port) &= 
@@ -104,50 +104,80 @@ uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode)
 }
 
 /*!****************************************************************************
- * @brief			Set pin state.
- * @details		   	Sets the given pin of the given port to the given state.
+ * @brief			Set pin output configuration. 
+ * @details		   	Sets the pin as push-pull or open-drain configuration.
  * @param[in]      	port    Holds the port number.
- * @param[in]      	pin	    Holds the pin number.
- * @param[in]      	state   Holds the state to be set on the pin: HIGH/LOW.
+ * @param[in]      	pin     Holds the pin number.
+ * @param[in]      	type    Holds the output type: push-pull or open-drain.
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state)
+uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type)
 {
 	uint8_t retVal = N_OK;
-	if((port < PORT_NUM_MAX) && (pin < PIN_NUM_MAX))
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (type < GPIO_OTYPE_MODE_MAX))
 	{
-		if(state == high)
+		if(type == opendrain)
 		{
-			GPIOX_ODR(port) |= (uint32_t)(1u << pin);
+			GPIOX_OTYPER(port) |= (uint32_t)(1u << pin);
+			retVal = OK;
 		}
-		else if(state == low)
+		else if(type == pushpull)
 		{
-			GPIOX_ODR(port) &= ~(uint32_t)(1u << pin);
+			GPIOX_OTYPER(port) &= ~(uint32_t)(1u << pin);
+			retVal = OK;
 		}
 		else
 		{
 			/* Should not reach */
 		}
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Set pin output speed. 
+ * @details		   	Sets pin toggling speed.
+ * @param[in]      	port    Holds the port number.
+ * @param[in]      	pin     Holds the pin number.
+ * @param[in]      	speed   Holds the speed: low, med, fast, high.
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed)
+{
+	uint8_t retVal = N_OK;
+	if((port < GPIO_PORT_NUM_MAX) && (speed < GPIO_OSPEED_MODE_MAX) && (pin < GPIO_PIN_NUM_MAX))
+	{
+		/* Clear bits before setting them to speed */
+		GPIOX_OSPEEDR(port) &= 
+			(~(uint32_t)(1u << (pin * 2u)) | ~(uint32_t)(1u << ((pin * 2u) + 1u)));
+		/* Setting pin to speed */
+		GPIOX_OSPEEDR(port) |= ((uint32_t)(speed << (pin * 2)));
 		retVal = OK;
 	}
 	return (retVal);
 }
 
 /*!****************************************************************************
- * @brief			Toggle pin state.
- * @details		   	Toggles the status of the given pin of the given port.
+ * @brief			Set pull mode for pin resistors. 
+ * @details		   	Sets the port mode as output, input, alternate or analog.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
+ * @param[in]      	mode    Holds the mode: out/in/alternate/analog.
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
+uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode)
 {
 	uint8_t retVal = N_OK;
-	if((port < PORT_NUM_MAX) && (pin < PIN_NUM_MAX))
+	if((port < GPIO_PORT_NUM_MAX) && (mode < GPIO_PULL_MODE_MAX) && (pin < GPIO_PIN_NUM_MAX))
 	{
-		GPIOX_ODR(port) ^= (uint32_t)(1u << pin);
+		/* Clear bits before setting them to mode */
+		GPIOX_PUPDR(port) &= 
+			(~(uint32_t)(1u << (pin * 2u)) | ~(uint32_t)(1u << ((pin * 2u) + 1u)));
+		/* Setting pin to mode */
+		GPIOX_PUPDR(port) |= ((uint32_t)(mode << (pin * 2)));
 		retVal = OK;
 	}
 	return (retVal);
@@ -165,7 +195,7 @@ uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
 uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state)
 {
 	uint8_t retVal = N_OK;
-	if((port < PORT_NUM_MAX) && (pin < PIN_NUM_MAX) && (state != NULL))
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state != NULL))
 	{
 		*state = ((GPIOX_IDR(port))>>pin)&1u;
 		retVal = OK;
@@ -178,13 +208,12 @@ uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state)
  * @details			Gets the state by value of given pin and given port.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
- * @param[out]     	state   Returns the state of the given pin.
  * @return         	retVal  Pin state (HIGH/LOW).
  ******************************************************************************/
-uint8_t Gpio_GetPinStateVal(portNumber port, pinNumber pin)
+pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin)
 {
 	pinState retVal = RET_ERROR;
-	if((port < PORT_NUM_MAX) && (pin < PIN_NUM_MAX))
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX))
 	{
 		retVal = ((GPIOX_IDR(port))>>pin)&1u;
 	}
@@ -192,24 +221,51 @@ uint8_t Gpio_GetPinStateVal(portNumber port, pinNumber pin)
 }
 
 /*!****************************************************************************
- * @brief			Set pull mode for pin resistors. 
- * @details		   	Sets the port mode as output, input, alternate or analog.
+ * @brief			Set pin state.
+ * @details		   	Sets the given pin of the given port to the given state.
  * @param[in]      	port    Holds the port number.
- * @param[in]      	pin     Holds the pin number.
- * @param[in]      	mode    Holds the mode: out/in/alternate/analog.
+ * @param[in]      	pin	    Holds the pin number.
+ * @param[in]      	state   Holds the state to be set on the pin: HIGH/LOW.
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode)
+uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state)
 {
 	uint8_t retVal = N_OK;
-	if((port < PORT_NUM_MAX) && (mode < PIN_MODE_MAX ) && (pin < PIN_NUM_MAX))
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state < GPIO_PIN_STATE_MAX))
 	{
-		/* Clear bits before setting them to mode */
-		GPIOX_PUPDR(port) &= 
-			(~(uint32_t)(1u << (pin * 2u)) | ~(uint32_t)(1u << ((pin * 2u) + 1u)));
-		/* Setting pin to mode */
-		GPIOX_PUPDR(port) |= ((uint32_t)(mode << (pin * 2)));
+		if(state == high)
+		{
+			GPIOX_ODR(port) |= (uint32_t)(1u << pin);
+			retVal = OK;
+		}
+		else if(state == low)
+		{
+			GPIOX_ODR(port) &= ~(uint32_t)(1u << pin);
+			retVal = OK;
+		}
+		else
+		{
+			/* Should not reach */
+		}
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Toggle pin state.
+ * @details		   	Toggles the status of the given pin of the given port.
+ * @param[in]      	port    Holds the port number.
+ * @param[in]      	pin     Holds the pin number.
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
+{
+	uint8_t retVal = N_OK;
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX))
+	{
+		GPIOX_ODR(port) ^= (uint32_t)(1u << pin);
 		retVal = OK;
 	}
 	return (retVal);
