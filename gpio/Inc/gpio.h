@@ -66,6 +66,10 @@ DEFINITION OF CONSTANTS
 #define GPIO_RES_MODE_MAX		(3u)
 /* Maximum number of pin states */
 #define GPIO_PIN_STATE_MAX		(2u)
+/* Bit Reset Offset on Bit Set/Reset Register */
+#define GPIO_BSRR_BR_PIN_OFFSET	(16u)
+/* Bit Reset Offset on Bit Set/Reset Register */
+#define GPIO_LCK_KEY			(16u)
 
 /******************************************************************************
 DECLARATION OF TYPES
@@ -181,6 +185,7 @@ uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state);
 pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin);
 uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
 uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
+uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state);
 
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
@@ -190,7 +195,7 @@ DECLARATION OF FUNCTION-LIKE MACROS
  * @details		   	Using this macro we can easily access GPIO registers based
  * 					on the provided port and offset between registers.
  ******************************************************************************/		
-#define GPIOX_REG(port, offset)		(*(volatile uint32_t *const)(GPIOX_BASE \
+#define GPIOX_REG(port, offset)		*((volatile uint32_t *const)(GPIOX_BASE \
 						   			+ (port * GPIOX_OFFSET) + offset))
 
 /* Mode Register, configures pin as: in/out/alternate/analog */
@@ -205,10 +210,8 @@ DECLARATION OF FUNCTION-LIKE MACROS
 #define GPIOX_IDR(port)			GPIOX_REG(port, GPIO_IDR_OFFSET)
 /* Output Data Register, writes to port */
 #define GPIOX_ODR(port)			GPIOX_REG(port, GPIO_ODR_OFFSET)
-/* Output Data Register, writes to port */
-#define GPIOX_ODR(port)			GPIOX_REG(port, GPIO_ODR_OFFSET)
 /* Bit Set Reset Register, for atomic bit set/reset */
-#define GPIOX_BSSR(port)		GPIOX_REG(port, GPIO_BSSR_OFFSET)
+#define GPIOX_BSRR(port)		GPIOX_REG(port, GPIO_BSRR_OFFSET)
 /* Configuration Lock Register, for locking GPIO configuration */
 #define GPIOX_LCKR(port)		GPIOX_REG(port, GPIO_LCKR_OFFSET)
 /* Alternate Function Register Low, configures alt function, pin1-pin7 */

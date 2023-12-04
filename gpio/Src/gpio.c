@@ -105,7 +105,9 @@ uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode)
 
 /*!****************************************************************************
  * @brief			Set pin output configuration. 
- * @details		   	Sets the pin as push-pull or open-drain configuration.
+ * @details		   	Sets the pin as push-pull or open-drain configuration. When
+ * 					open-drain, pin states are either low or floating. When
+ * 					push-pull, pin states are either low or high.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
  * @param[in]      	type    Holds the output type: push-pull or open-drain.
@@ -267,6 +269,47 @@ uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
 	{
 		GPIOX_ODR(port) ^= (uint32_t)(1u << pin);
 		retVal = OK;
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Set pin state using atomic operation (BSRR Register).
+ * @details		   	Sets the given pin of the given port to the given state.
+ * 					This is done atomically.
+ * @param[in]      	port    Holds the port number.
+ * @param[in]      	pin	    Holds the pin number.
+ * @param[in]      	state   Holds the state to be set on the pin: HIGH/LOW.
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state)
+{
+	uint8_t retVal = N_OK;
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state < GPIO_PIN_STATE_MAX))
+	{
+		GPIOX_BSRR(port) |= (uint32_t)((state << pin)
+							| ((!state) << (pin + GPIO_BSRR_BR_PIN_OFFSET)));
+		retVal = OK;
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Set pin state.
+ * @details		   	Sets the given pin of the given port to the given state.
+ * @param[in]      	port    Holds the port number.
+ * @param[in]      	pin	    Holds the pin number.
+ * @param[in]      	state   Holds the state to be set on the pin: HIGH/LOW.
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_LockCfg(portNumber port, uint16_t mask)
+{
+	uint8_t retVal = N_OK;
+	if((port < GPIO_PORT_NUM_MAX))
+	{
+		GPIOX_LCKR(port) |= (uint32_t)((1 << GPIO_LCK_KEY) | mask);
 	}
 	return (retVal);
 }
