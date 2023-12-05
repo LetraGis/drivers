@@ -296,20 +296,34 @@ uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state)
 }
 
 /*!****************************************************************************
- * @brief			Set pin state.
- * @details		   	Sets the given pin of the given port to the given state.
+ * @brief			Locks GPIO configuration
+ * @details		   	Locks GPIO configuration for the given port according to
+ * 					the mask value (each bit corresponds to a pin-port). 
+ * 					Registers to be locked: MODER, OTYPER, OSPEEDR, PUPDR, AFRL 
+ * 					and AFRH. Needs a special write sequence to lock
  * @param[in]      	port    Holds the port number.
- * @param[in]      	pin	    Holds the pin number.
- * @param[in]      	state   Holds the state to be set on the pin: HIGH/LOW.
+ * @param[in]      	mask	Holds the pins to be locked, each bit represents a
+ * 							pin-port (0 to 15).
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_LockCfg(portNumber port, uint16_t mask)
+uint8_t Gpio_LockCfg(portNumber port, lockMask mask)
 {
 	uint8_t retVal = N_OK;
+	uint32_t temp;
 	if((port < GPIO_PORT_NUM_MAX))
 	{
-		GPIOX_LCKR(port) |= (uint32_t)((1 << GPIO_LCK_KEY) | mask);
+		GPIOX_LCKR(port) = (uint32_t)((1u << GPIO_LCK_KEY) | mask);
+		GPIOX_LCKR(port) = (uint32_t)(mask);
+		GPIOX_LCKR(port) = (uint32_t)((1u << GPIO_LCK_KEY) | mask);
+		/* Dummy read, part of special write sequence. */
+		(void)GPIOX_LCKR(port);
+		temp = GPIOX_LCKR(port);
+		/* Check for Lock Key bit. If 1, locked was successful. */
+		if(temp & (1u << GPIO_LCK_KEY))
+		{
+			retVal = OK;
+		}
 	}
 	return (retVal);
 }

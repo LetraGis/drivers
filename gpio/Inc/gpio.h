@@ -74,6 +74,8 @@ DEFINITION OF CONSTANTS
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
+
+typedef uint16_t lockMask;
 typedef enum
 {
 	porta = 0,
@@ -186,6 +188,7 @@ pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin);
 uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
 uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
 uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state);
+uint8_t Gpio_LockCfg(portNumber port, lockMask mask);
 
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
