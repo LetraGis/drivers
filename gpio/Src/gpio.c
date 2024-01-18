@@ -119,12 +119,12 @@ uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type)
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (type < GPIO_OTYPE_MODE_MAX))
 	{
-		if(type == opendrain)
+		if(type == openDrain)
 		{
 			GPIOX_OTYPER(port) |= (uint32_t)(1u << pin);
 			retVal = OK;
 		}
-		else if(type == pushpull)
+		else if(type == pushPull)
 		{
 			GPIOX_OTYPER(port) &= ~(uint32_t)(1u << pin);
 			retVal = OK;
@@ -322,6 +322,40 @@ uint8_t Gpio_LockCfg(portNumber port, lockMask mask)
 		/* Check for Lock Key bit. If 1, locked was successful. */
 		if(temp & (1u << GPIO_LCK_KEY))
 		{
+			retVal = OK;
+		}
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Configures Alternate Fuction for a pin.
+ * @details		   	Configures Alternate Function for a given pin of a given
+ * 					port with up to 16 possible configurations. Check datasheet
+ * 					for all pin configurations available.
+ * @param[in]      	port    Holds the port number.
+ * @param[in]      	pin	    Holds the pin number.
+ * @param[in]      	func	Holds the alternate function number.
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_ConfigAltFnc(portNumber port, pinNumber pin, altFunction func)
+{
+	uint8_t retVal = N_OK;
+	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (func < GPIO_ALT_FNC_MAX))
+	{
+		/* If target pin is minor than 8 pin, use Alternate Function Low Reg */
+		if(pin < pin8)
+		{
+			GPIOX_AFRL(port) |= 
+				((func & GPIO_ALT_FIELD_MASK) << (pin * GPIO_ALT_FIELD_LENGTH));
+			retVal = OK;
+		}
+		/* Else, use Alternate Function High Reg */
+		else
+		{
+			GPIOX_AFRH(port) |= 
+				((func & GPIO_ALT_FIELD_MASK) << (pin * GPIO_ALT_FIELD_LENGTH));
 			retVal = OK;
 		}
 	}

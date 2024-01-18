@@ -70,6 +70,13 @@ DEFINITION OF CONSTANTS
 #define GPIO_BSRR_BR_PIN_OFFSET	(16u)
 /* Bit Reset Offset on Bit Set/Reset Register */
 #define GPIO_LCK_KEY			(16u)
+/* Maximum number of alternate function configurations */
+#define GPIO_ALT_FNC_MAX		(16u)
+/* Number of bits used for alternate function:
+	(2^4 = 16 possible combinations) */
+#define GPIO_ALT_FIELD_LENGTH	(4u)
+/* Mask for reading lower nibble */
+#define GPIO_ALT_FIELD_MASK		(0x0Fu)
 
 /******************************************************************************
 DECLARATION OF TYPES
@@ -118,23 +125,23 @@ typedef enum
 
 typedef enum
 {
-	pushpull = 0,
-	opendrain,
+	pushPull = 0,
+	openDrain,
 } outputType;
 
 typedef enum
 {
-	lowspeed = 0,
-	mediumspeed,
-	fast_speed,
-	high_speed,
+	lowSpeed = 0,
+	mediumSpeed,
+	fastSpeed,
+	highSpeed,
 } outputSpeed;
 
 typedef enum
 {
 	none = 0,
-	pullup,
-	pulldown,
+	pullUp,
+	pullDown,
 } pullMode;
 
 typedef enum
@@ -145,22 +152,22 @@ typedef enum
 
 typedef enum
 {
-	altfun0 = 0,
-	altfun1,
-	altfun2,
-	altfun3,
-	altfun4,
-	altfun5,
-	altfun6,
-	altfun7,
-	altfun8,
-	altfun9,
-	altfun10,
-	altfun11,
-	altfun12,
-	altfun13,
-	altfun14,
-	altfun15,
+	altFun0 = 0,
+	altFun1,
+	altFun2,
+	altFun3,
+	altFun4,
+	altFun5,
+	altFun6,
+	altFun7,
+	altFun8,
+	altFun9,
+	altFun10,
+	altFun11,
+	altFun12,
+	altFun13,
+	altFun14,
+	altFun15,
 } altFunction;
 
 /******************************************************************************
@@ -189,6 +196,7 @@ uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
 uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
 uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state);
 uint8_t Gpio_LockCfg(portNumber port, lockMask mask);
+uint8_t Gpio_ConfigAltFnc(portNumber port, pinNumber pin, altFunction func);
 
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
