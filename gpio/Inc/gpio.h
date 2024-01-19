@@ -186,6 +186,7 @@ void Gpio_Init(void);
 void Gpio_InitCallback(void); /* Needs to be defined by the user to initialize
 								 GPIO ports, set pin modes, etc. */
 uint8_t Gpio_PortInit(portNumber port);
+uint8_t Gpio_PortDeinit(portNumber port);
 uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode);
 uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type);
 uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed);

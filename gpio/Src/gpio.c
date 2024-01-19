@@ -1,8 +1,11 @@
-/*
- * gpio.c
- *
- *  Created on: Jun 1, 2022
- *      Author: LetraGis
+/**
+ ******************************************************************************
+ * @file           : gpio.c
+ * @author         : Letra Gis
+ * @brief          : This files contains API's for using GPIO Peripheral. A
+ * 					 brief description of each API capabilities can be found on
+ * 					 in its header.
+ ******************************************************************************
  */
 
 /******************************************************************************
@@ -80,8 +83,31 @@ uint8_t Gpio_PortInit(portNumber port)
 }
 
 /*!****************************************************************************
- * @brief			Configure port mode.
- * @details		   	Sets the port mode as output, input, alternate or analog.
+ * @brief			Resets all GPIO related registers to its reset state.
+ * @details		   	By means of setting the correpsonding bit on the RCC AHB1
+ * 					Reset Register, all GPIO registers will be resetted to its
+ * 					initial values.
+ * @param[in]      	port    Holds the port number
+ * @return         	OK      Request successful.
+ *                 	N_OK    Request was not successful.
+ ******************************************************************************/
+uint8_t Gpio_PortDeinit(portNumber port)
+{
+	uint8_t retVal = N_OK;
+	/* GPIO port enable */
+	if(port < GPIO_PORT_NUM_MAX)
+	{
+		RCC->AHB1RSTR |= (1u << port);
+		/* Right after resetting GPIOX registers, we need to clear the bit. */
+		RCC->AHB1RSTR &= (~(uint32_t)(1u << port));
+		retVal = OK;
+	}
+	return (retVal);
+}
+
+/*!****************************************************************************
+ * @brief			Configure pin mode.
+ * @details		   	Sets the pin mode as output, input, alternate or analog.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
  * @param[in]      	mode    Holds the mode: out/in/alternate/analog.
@@ -139,7 +165,6 @@ uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type)
 
 /*!****************************************************************************
  * @brief			Set pin output speed. 
- * @details		   	Sets pin toggling speed.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
  * @param[in]      	speed   Holds the speed: low, med, fast, high.
@@ -163,10 +188,10 @@ uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed)
 
 /*!****************************************************************************
  * @brief			Set pull mode for pin resistors. 
- * @details		   	Sets the port mode as output, input, alternate or analog.
+ * @details		   	Sets the pin resistors as none, pull-up or pull-down.
  * @param[in]      	port    Holds the port number.
  * @param[in]      	pin     Holds the pin number.
- * @param[in]      	mode    Holds the mode: out/in/alternate/analog.
+ * @param[in]      	mode    Holds the mode: none, pull-up or pull-down.
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
