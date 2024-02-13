@@ -82,7 +82,7 @@ DEFINITION OF CONSTANTS
 DECLARATION OF TYPES
 ******************************************************************************/
 
-typedef uint16_t lockMask;
+typedef uint16_t Gpio_lockMask;
 typedef enum
 {
 	porta = 0,
@@ -93,7 +93,7 @@ typedef enum
 	portf,
 	portg,
 	porth,
-} portNumber;
+} Gpio_portNumber;
 
 typedef enum
 {
@@ -113,7 +113,7 @@ typedef enum
 	pin13,
 	pin14,
 	pin15,
-} pinNumber;
+} Gpio_pinNumber;
 
 typedef enum
 {
@@ -121,13 +121,13 @@ typedef enum
 	output,
 	alternate,
 	analog,
-} portMode;
+} Gpio_portMode;
 
 typedef enum
 {
 	pushPull = 0,
 	openDrain,
-} outputType;
+} Gpio_outputType;
 
 typedef enum
 {
@@ -135,20 +135,20 @@ typedef enum
 	mediumSpeed,
 	fastSpeed,
 	highSpeed,
-} outputSpeed;
+} Gpio_outputSpeed;
 
 typedef enum
 {
 	none = 0,
 	pullUp,
 	pullDown,
-} pullMode;
+} Gpio_pullMode;
 
 typedef enum
 {
 	low 	= 0,
 	high 	= 1,
-} pinState;
+} Gpio_pinState;
 
 typedef enum
 {
@@ -168,7 +168,7 @@ typedef enum
 	altFun13,
 	altFun14,
 	altFun15,
-} altFunction;
+} Gpio_altFunction;
 
 /******************************************************************************
 DECLARATION OF VARIABLES
@@ -185,19 +185,19 @@ DECLARATION OF FUNCTIONS
 void Gpio_Init(void);
 void Gpio_InitCallback(void); /* Needs to be defined by the user to initialize
 								 GPIO ports, set pin modes, etc. */
-uint8_t Gpio_PortInit(portNumber port);
-uint8_t Gpio_PortDeinit(portNumber port);
-uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode);
-uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type);
-uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed);
-uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode);
-uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state);
-pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin);
-uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state);
-uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin);
-uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state);
-uint8_t Gpio_LockCfg(portNumber port, lockMask mask);
-uint8_t Gpio_ConfigAltFnc(portNumber port, pinNumber pin, altFunction func);
+uint8_t Gpio_PortInit(Gpio_portNumber port);
+uint8_t Gpio_PortDeinit(Gpio_portNumber port);
+uint8_t Gpio_PinMode(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_portMode mode);
+uint8_t Gpio_OutputTypeCfg(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_outputType type);
+uint8_t Gpio_OutputSpeed(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_outputSpeed speed);
+uint8_t Gpio_PullMode(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pullMode mode);
+uint8_t Gpio_GetPinStateRef(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState *state);
+Gpio_pinState Gpio_GetPinStateVal(Gpio_portNumber port, Gpio_pinNumber pin);
+uint8_t Gpio_SetPinState(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState state);
+uint8_t Gpio_TogglePinState(Gpio_portNumber port, Gpio_pinNumber pin);
+uint8_t Gpio_SetPinStateAtomic(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState state);
+uint8_t Gpio_LockCfg(Gpio_portNumber port, Gpio_lockMask mask);
+uint8_t Gpio_ConfigAltFnc(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_altFunction func);
 
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS

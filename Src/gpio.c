@@ -70,7 +70,7 @@ void Gpio_Init(void)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_PortInit(portNumber port)
+uint8_t Gpio_PortInit(Gpio_portNumber port)
 {
 	uint8_t retVal = N_OK;
 	/* GPIO port enable */
@@ -91,7 +91,7 @@ uint8_t Gpio_PortInit(portNumber port)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_PortDeinit(portNumber port)
+uint8_t Gpio_PortDeinit(Gpio_portNumber port)
 {
 	uint8_t retVal = N_OK;
 	/* GPIO port enable */
@@ -114,7 +114,7 @@ uint8_t Gpio_PortDeinit(portNumber port)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode)
+uint8_t Gpio_PinMode(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_portMode mode)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (mode < GPIO_PIN_MODE_MAX ) && (pin < GPIO_PIN_NUM_MAX))
@@ -140,7 +140,7 @@ uint8_t Gpio_PinMode(portNumber port, pinNumber pin, portMode mode)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type)
+uint8_t Gpio_OutputTypeCfg(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_outputType type)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (type < GPIO_OTYPE_MODE_MAX))
@@ -171,7 +171,7 @@ uint8_t Gpio_OutputType(portNumber port, pinNumber pin, outputType type)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed)
+uint8_t Gpio_OutputSpeed(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_outputSpeed speed)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (speed < GPIO_OSPEED_MODE_MAX) && (pin < GPIO_PIN_NUM_MAX))
@@ -195,7 +195,7 @@ uint8_t Gpio_OutputSpeed(portNumber port, pinNumber pin, outputSpeed speed)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode)
+uint8_t Gpio_PullMode(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pullMode mode)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (mode < GPIO_PULL_MODE_MAX) && (pin < GPIO_PIN_NUM_MAX))
@@ -219,7 +219,7 @@ uint8_t Gpio_PullMode(portNumber port, pinNumber pin, pullMode mode)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state)
+uint8_t Gpio_GetPinStateRef(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState *state)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state != NULL))
@@ -237,9 +237,9 @@ uint8_t Gpio_GetPinStateRef(portNumber port, pinNumber pin, pinState *state)
  * @param[in]      	pin     Holds the pin number.
  * @return         	retVal  Pin state (HIGH/LOW).
  ******************************************************************************/
-pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin)
+Gpio_pinState Gpio_GetPinStateVal(Gpio_portNumber port, Gpio_pinNumber pin)
 {
-	pinState retVal = RET_ERROR;
+	Gpio_pinState retVal = RET_ERROR;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX))
 	{
 		retVal = ((GPIOX_IDR(port))>>pin)&1u;
@@ -256,7 +256,7 @@ pinState Gpio_GetPinStateVal(portNumber port, pinNumber pin)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state)
+uint8_t Gpio_SetPinState(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState state)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state < GPIO_PIN_STATE_MAX))
@@ -287,7 +287,7 @@ uint8_t Gpio_SetPinState(portNumber port, pinNumber pin, pinState state)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
+uint8_t Gpio_TogglePinState(Gpio_portNumber port, Gpio_pinNumber pin)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX))
@@ -308,7 +308,7 @@ uint8_t Gpio_TogglePinState(portNumber port, pinNumber pin)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state)
+uint8_t Gpio_SetPinStateAtomic(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_pinState state)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (state < GPIO_PIN_STATE_MAX))
@@ -332,7 +332,7 @@ uint8_t Gpio_SetPinStateAtomic(portNumber port, pinNumber pin, pinState state)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_LockCfg(portNumber port, lockMask mask)
+uint8_t Gpio_LockCfg(Gpio_portNumber port, Gpio_lockMask mask)
 {
 	uint8_t retVal = N_OK;
 	uint32_t temp;
@@ -364,7 +364,7 @@ uint8_t Gpio_LockCfg(portNumber port, lockMask mask)
  * @return         	OK      Request successful.
  *                 	N_OK    Request was not successful.
  ******************************************************************************/
-uint8_t Gpio_ConfigAltFnc(portNumber port, pinNumber pin, altFunction func)
+uint8_t Gpio_ConfigAltFnc(Gpio_portNumber port, Gpio_pinNumber pin, Gpio_altFunction func)
 {
 	uint8_t retVal = N_OK;
 	if((port < GPIO_PORT_NUM_MAX) && (pin < GPIO_PIN_NUM_MAX) && (func < GPIO_ALT_FNC_MAX))
