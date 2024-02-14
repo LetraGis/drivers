@@ -17,6 +17,15 @@ EXTERNAL DEPENDENCIES
 /******************************************************************************
 DEFINITION OF CONSTANTS
 ******************************************************************************/
+/* Number of SPI Peripherals. */
+#define SPI_1    1  /* SPI1 Peripheral Number */
+#define SPI_2    2  /* SPI2 Peripheral Number */
+#define SPI_3    3  /* SPI3 Peripheral Number */
+#define SPI_4    4  /* SPI4 Peripheral Number */
+
+/* Number of elements to be substracted from length counter when transmitting
+or receiving DFF's of two bytes of data over SPI. */
+#define DFF_TWO_BYTES   2u
 
 /******************************************************************************
 DECLARATION OF TYPES
@@ -58,11 +67,6 @@ typedef union Spi_Config2Type_Tag
         uint8_t TXEIE       : 1;    /* TxBuffer Empty Interrupt Enable */
     } Fields;
 } Spi_Config2Type;
-
-#define SPI_1    1
-#define SPI_2    2
-#define SPI_3    3
-#define SPI_4    4
 
 /* BIDIMODE */
 typedef enum
