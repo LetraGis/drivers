@@ -131,7 +131,7 @@ void Spi_ReceiveData(SPI_TypeDef *pSpiHandle, uint8_t *pRxBuff, uint32_t len)
         {
             *pRxBuff = pSpiHandle->DR;
             len--;
-            pTxBuff++;
+            pRxBuff++;
         }
         /* DFF = 2 bytes */
         else

@@ -186,11 +186,29 @@ DECLARATION OF FUNCTION-LIKE MACROS
 #define Spi_SetSSI_Helper(x)        SPI##x->CR1 |= SPI_CR1_SSI
 #define Spi_SetSSI(x)               Spi_SetSSI_Helper(x)
 
+/* Sets the SSOE bit of the Configuration Register 2, of the given SPI
+*  peripheral, specified by input 'x'. This enables SS Output.
+*/
+#define Spi_SetSSOE_Helper(x)       SPI##x->CR2 |= SPI_CR2_SSOE
+#define Spi_SetSSOE(x)              Spi_SetSSOE_Helper(x)
+
+/* Checks the BSY flag of the Status Register, of the given SPI peripheral, 
+* specified by input 'x', which determines if SPI HW is busy.
+*/
+#define Spi_ReadBSYFlag_Helper(x)   ((SPI##x->SR >> SPI_SR_BSY_Pos) & 1u)
+#define Spi_ReadBSYFlag(x)          Spi_ReadBSYFlag_Helper(x)
+
 /* Sets the SPE bit of the Configuration Register 1, of the given SPI 
 *  peripheral, specified by input 'x'. This will enable the SPI Peripheral.
 */
 #define Spi_PeripheralEnable_Helper(x)      SPI##x->CR1 |= SPI_CR1_SPE
 #define Spi_PeripheralEnable(x)             Spi_PeripheralEnable_Helper(x)
+
+/* Clears the SPE bit of the Configuration Register 1, of the given SPI 
+*  peripheral, specified by input 'x'. This will disable the SPI Peripheral.
+*/
+#define Spi_PeripheralDisable_Helper(x)     SPI##x->CR1 &= ~(uint32_t)(SPI_CR1_SPE)
+#define Spi_PeripheralDisable(x)            Spi_PeripheralDisable_Helper(x)
 /******************************************************************************
 End Of File
 ******************************************************************************/
