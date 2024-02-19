@@ -27,6 +27,9 @@ DEFINITION OF CONSTANTS
 or receiving DFF's of two bytes of data over SPI. */
 #define DFF_TWO_BYTES   2u
 
+/* Spi_GetFlagStatus Return values */
+#define SPI_FLAG_NOT_SET    0u
+#define SPI_FLAG_SET        1u
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
@@ -138,6 +141,20 @@ typedef enum
     simplexTx,
 } Spi_BusConfig;
 
+/* Status Register Flags */
+typedef enum
+{
+    SPI_SR_RXNE,
+    SPI_SR_TXE,
+    SPI_SR_CHSIDE,
+    SPI_SR_UDR,
+    SPI_SR_CRCERR,
+    SPI_SR_MODF,
+    SPI_SR_OVR,
+    SPI_SR_BSY,
+    SPI_SR_FRE
+} Spi_StatusFlag;
+
 /******************************************************************************
 DECLARATION OF VARIABLES
 ******************************************************************************/
@@ -156,6 +173,50 @@ void Spi_Deinit(void);
 void Spi_SendData(SPI_TypeDef *pSpiHandle, uint8_t *pTxBuff, uint32_t len);
 void Spi_ReceiveData(SPI_TypeDef *pSpiHandle, uint8_t *pRxBuff, uint32_t len);
 
+/*!****************************************************************************
+ * @brief			Gets the status of a given flag from Status Register.
+ * @details		   	Returns if either the flag is set or nor set, based on the
+ *                  flag value given by the user.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Status Register.
+ * @param[in]       flag        Flag to be tested. Possible values. Use values
+ *                              from Spi_StatusFlag type.
+ * @return         	flagStatus  Flag is set or not set.
+ ******************************************************************************/
+__STATIC_INLINE uint8_t Spi_GetFlagStatus(SPI_TypeDef *pSpiHandle, Spi_StatusFlag flag)
+{
+    Spi_StatusFlag flagStatus = SPI_FLAG_NOT_SET;
+    if(flag == (pSpiHandle->SR & flag))
+    {
+        flagStatus = SPI_FLAG_SET;
+    }
+    return flagStatus;
+}
+
+/*!****************************************************************************
+ * @brief			Writes content of Data Register.
+ * @details		   	Writes content of Data Register based of the input given by
+ *                  the user. Useful during Full-Duplex configuration.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register (which
+ *                              is connected to Tx Buffer).
+ * @return         	void        No output parameters.
+ ******************************************************************************/
+__STATIC_INLINE void Spi_WriteDR(SPI_TypeDef *pSpiHandle, uint32_t dataRegVal)
+{
+    pSpiHandle->DR = dataRegVal;
+}
+
+/*!****************************************************************************
+ * @brief			Reads content of Data Register.
+ * @details		   	Reads content of Data Register. Useful during Full-Duplex
+ *                  configuration.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register (which
+ *                              is connected to Rx Buffer).
+ * @return         	dataRegVal  Value read from Data Register (Rx Buffer)
+ ******************************************************************************/
+__STATIC_INLINE uint32_t Spi_ReadDR(SPI_TypeDef *pSpiHandle)
+{
+    return (pSpiHandle->DR);
+}
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
 ******************************************************************************/
@@ -209,6 +270,16 @@ DECLARATION OF FUNCTION-LIKE MACROS
 */
 #define Spi_PeripheralDisable_Helper(x)     SPI##x->CR1 &= ~(uint32_t)(SPI_CR1_SPE)
 #define Spi_PeripheralDisable(x)            Spi_PeripheralDisable_Helper(x)
+
+/* LetraGis (TODO): following macros produce the same result as Write/ReadDR
+API's. To evaluate which implementation suits better. */
+/* Reads Data Register. Used for Full-Duplex dummy reads. */
+#define Spi_ReadDataReg_Helper(x)           (SPI##x->DR)
+#define Spi_ReadDataReg(x)                  Spi_ReadDataReg_Helper(x)
+
+/* Writes Data Register. Used for Full-Duplex dummy writes. */
+#define Spi_WriteDataReg_Helper(x, y)       (SPI##x->DR = y)
+#define Spi_WriteDataReg(x, y)              Spi_WriteDataReg_Helper(x, y)
 /******************************************************************************
 End Of File
 ******************************************************************************/
