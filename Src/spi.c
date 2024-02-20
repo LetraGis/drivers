@@ -93,7 +93,7 @@ void Spi_SendData(SPI_TypeDef *pSpiHandle, uint8_t *pTxBuff, uint32_t len)
     {
         /* Wait until TXE Flag is set. When set, it indicates that Tx Buffer 
         is empty and we can load data into DR. */
-        while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, SPI_SR_TXE)));
+        while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, TXE_Flag)));
         /* DFF = 1 byte */
         if(SPI_CR1_DFF != (pSpiHandle->CR1 & SPI_CR1_DFF_Msk))
         {
@@ -129,7 +129,7 @@ void Spi_ReceiveData(SPI_TypeDef *pSpiHandle, uint8_t *pRxBuff, uint32_t len)
     {
         /* Wait until RXNE Flag is set. When set, it indicates that Rx Buffer 
         has content and we can read data from DR. */
-        while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, SPI_SR_RXNE)));
+        while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, RXNE_Flag)));
         /* DFF = 1 byte */
         if(SPI_CR1_DFF != (pSpiHandle->CR1 & SPI_CR1_DFF_Msk))
         {

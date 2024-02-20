@@ -144,15 +144,15 @@ typedef enum
 /* Status Register Flags */
 typedef enum
 {
-    SPI_SR_RXNE,
-    SPI_SR_TXE,
-    SPI_SR_CHSIDE,
-    SPI_SR_UDR,
-    SPI_SR_CRCERR,
-    SPI_SR_MODF,
-    SPI_SR_OVR,
-    SPI_SR_BSY,
-    SPI_SR_FRE
+    RXNE_Flag   = SPI_SR_RXNE,
+    TXE_Flag    = SPI_SR_TXE,
+    CHSIDE_Flag = SPI_SR_CHSIDE,
+    UDR_Flag    = SPI_SR_UDR,
+    CRCERR_Flag = SPI_SR_CRCERR,
+    MODF_Flag   = SPI_SR_MODF,
+    OVR_Flag    = SPI_SR_OVR,
+    BSY_Flag    = SPI_SR_BSY,
+    FRE_Flag    = SPI_SR_FRE
 } Spi_StatusFlag;
 
 /******************************************************************************
@@ -193,14 +193,14 @@ __STATIC_INLINE uint8_t Spi_GetFlagStatus(SPI_TypeDef *pSpiHandle, Spi_StatusFla
 }
 
 /*!****************************************************************************
- * @brief			Writes content of Data Register.
- * @details		   	Writes content of Data Register based of the input given by
+ * @brief			Writes content to Data Register.
+ * @details		   	Writes content to Data Register based of the input given by
  *                  the user. Useful during Full-Duplex configuration.
  * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register (which
  *                              is connected to Tx Buffer).
  * @return         	void        No output parameters.
  ******************************************************************************/
-__STATIC_INLINE void Spi_WriteDR(SPI_TypeDef *pSpiHandle, uint32_t dataRegVal)
+__STATIC_INLINE void Spi_WriteDR(SPI_TypeDef *pSpiHandle, uint16_t dataRegVal)
 {
     pSpiHandle->DR = dataRegVal;
 }
@@ -213,9 +213,40 @@ __STATIC_INLINE void Spi_WriteDR(SPI_TypeDef *pSpiHandle, uint32_t dataRegVal)
  *                              is connected to Rx Buffer).
  * @return         	dataRegVal  Value read from Data Register (Rx Buffer)
  ******************************************************************************/
-__STATIC_INLINE uint32_t Spi_ReadDR(SPI_TypeDef *pSpiHandle)
+__STATIC_INLINE uint16_t Spi_ReadDR(SPI_TypeDef *pSpiHandle)
 {
     return (pSpiHandle->DR);
+}
+
+/*!****************************************************************************
+ * @brief			Reads from SPI's Data Register.
+ * @details		   	Reads data from SPI's Data Register once the RXNE flag is
+ *                  set, which indicates that  Rx Buffer has data in it and 
+ *                  we can read Data Register.
+ *                  them.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register.
+ * @return         	DataReg     Contents of the Data Register.
+ ******************************************************************************/
+__STATIC_INLINE uint16_t Spi_ReadData(SPI_TypeDef *pSpiHandle)
+{
+    while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, RXNE_Flag)));
+    return pSpiHandle->DR;
+}
+
+/*!****************************************************************************
+ * @brief			Writes to SPI's Data Register.
+ * @details		   	Writes data to SPI's Data Register and waits until TXE flag
+ *                  is set, which indicates that Tx Buffer is empty and we can
+ *                  contents have been transfered to Data Register.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Status Register.
+ * @param[in]       flag        Flag to be tested. Possible values. Use values
+ *                              from Spi_StatusFlag type.
+ * @return         	flagStatus  Flag is set or not set.
+ ******************************************************************************/
+__STATIC_INLINE void Spi_WriteData(SPI_TypeDef *pSpiHandle, uint16_t data)
+{
+    while (SPI_FLAG_SET != (Spi_GetFlagStatus(pSpiHandle, TXE_Flag)));
+    pSpiHandle->DR = data;
 }
 /******************************************************************************
 DECLARATION OF FUNCTION-LIKE MACROS
