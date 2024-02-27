@@ -33,7 +33,7 @@ or receiving DFF's of two bytes of data over SPI. */
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
-typedef union Spi_Config1Type_Tag
+typedef union Spi_Cfg1RegType_Tag
 {
     uint16_t Bytes;
     struct
@@ -53,9 +53,9 @@ typedef union Spi_Config1Type_Tag
         uint16_t BIDIOE     : 1;    /* Output Enable in bidirectional mode */
         uint16_t BIDIMODE   : 1;    /* Bidirectional data mode enabled. */
     } Fields;
-} Spi_Config1Type;
+} Spi_Cfg1RegType;
 
-typedef union Spi_Config2Type_Tag
+typedef union Spi_Cfg2RegType_Tag
 {
     uint8_t Bytes;
     struct
@@ -69,7 +69,7 @@ typedef union Spi_Config2Type_Tag
         uint8_t RXNEIE      : 1;    /* RxBuffer Not-Empty Interrupt Enable */
         uint8_t TXEIE       : 1;    /* TxBuffer Empty Interrupt Enable */
     } Fields;
-} Spi_Config2Type;
+} Spi_Cfg2RegType;
 
 /* BIDIMODE */
 typedef enum
@@ -172,6 +172,7 @@ void Spi_InitCallback(void); /* Needs to be defined by the user to initialize
 void Spi_Deinit(void);
 void Spi_SendData(SPI_TypeDef *pSpiHandle, uint8_t *pTxBuff, uint32_t len);
 void Spi_ReceiveData(SPI_TypeDef *pSpiHandle, uint8_t *pRxBuff, uint32_t len);
+uint16_t Spi_SendReceiveData(SPI_TypeDef *pSpiHandle, uint16_t TxBuff);
 
 /*!****************************************************************************
  * @brief			Gets the status of a given flag from Status Register.
@@ -221,9 +222,8 @@ __STATIC_INLINE uint16_t Spi_ReadDR(SPI_TypeDef *pSpiHandle)
 /*!****************************************************************************
  * @brief			Reads from SPI's Data Register.
  * @details		   	Reads data from SPI's Data Register once the RXNE flag is
- *                  set, which indicates that  Rx Buffer has data in it and 
- *                  we can read Data Register.
- *                  them.
+ *                  set, which indicates that Rx Buffer is full and we can read 
+ *                  the Data Register.
  * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register.
  * @return         	DataReg     Contents of the Data Register.
  ******************************************************************************/

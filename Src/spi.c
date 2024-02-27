@@ -149,6 +149,29 @@ void Spi_ReceiveData(SPI_TypeDef *pSpiHandle, uint8_t *pRxBuff, uint32_t len)
     }
 }
 
+/*!****************************************************************************
+ * @brief			Sends and Receives data over SPI in Full-Duplex mode.
+ * @details		   	Sends and Receives data over SPI (in Full-Duplex mode) in
+ *                  blocking call. In Full-Duplex mode, both MISO and MOSI
+ *                  lines are used to exchange data between Controller and
+ *                  Peripheral. While transmitting from Controller, Peripheral
+ *                  also sends data, which is transferred as the return from
+ *                  the function.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Tx and Rx Buffers,
+ *                              among other flags.
+ * @param[in]       pTxBuffer   Pointer to Transmit Buffer
+ * @return         	void        No output parameters.
+ ******************************************************************************/
+uint16_t Spi_SendReceiveData(SPI_TypeDef *pSpiHandle, uint16_t TxBuff)
+{
+    /* Send Data. Waits until Tx Buffer is empty before putting data into the
+    Data Register. */
+    Spi_WriteData(pSpiHandle, TxBuff);
+    /* Receive Data. Waits until Rx Buffer is bull before reading data from the
+    Data Register. */
+    return Spi_ReadData(pSpiHandle);
+}
+
 /******************************************************************************
 End Of File
 ******************************************************************************/
