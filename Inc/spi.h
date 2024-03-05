@@ -33,19 +33,21 @@ or receiving DFF's of two bytes of data over SPI. */
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
+
+/***********************  SPI CR1 Related Definitions  ***********************/
 typedef union Spi_Cfg1RegType_Tag
 {
     uint16_t Bytes;
     struct
     {
-        uint16_t CPHA       : 1;    /* Clock Phase. Determines clock capture edge */
+        uint16_t CPHA       : 1;    /* Clock Phase. Sets clock capture edge */
         uint16_t CPOL       : 1;    /* Clock Polarity. */
         uint16_t MSTR       : 1;    /* Device Selection. 0 - slave, 1 master */
-        uint16_t BR         : 3;    /* Baud Rate. Source Clock division ratio */
+        uint16_t BR         : 3;    /* Baud Rate. SourceClock division ratio */
         uint16_t SPE        : 1;    /* SPI Enable. */
         uint16_t LSBFIRST   : 1;    /* Frame Format. 0-MSB First, 1-LSB First */
         uint16_t SSI        : 1;    /* Internal Slave Select. NSS Pin related */
-        uint16_t SSM        : 1;    /* Software Slave Mgt. 0-enabled, 1-disabled */
+        uint16_t SSM        : 1;    /* SW Slave Mgt. 0-enabled, 1-disabled */
         uint16_t RXONLY     : 1;    /* Receive Only Mode enabled. */
         uint16_t DFF        : 1;    /* Data Frame Format. 0-8 bits, 1-16 bits */
         uint16_t CRCNEXT    : 1;    /* CRC Transfer Next. 0-data, 1-CRC */
@@ -55,6 +57,69 @@ typedef union Spi_Cfg1RegType_Tag
     } Fields;
 } Spi_Cfg1RegType;
 
+/* CPHA */
+typedef enum
+{
+    firstEdge = 0,  /* Data Capture: First clock transition */
+    secondEdge,     /* Data Capture: Second clock transition */
+} Spi_ClockPhase;
+
+/* CPOL */
+typedef enum
+{
+    clkPolLowIdle = 0,  /* Clock to 0 when idle */
+    clkPolHighIdle,     /* Clock to 1 when idle */
+} Spi_ClockPolarity;
+
+/* MSTR */
+typedef enum
+{
+    spiSlave = 0,   /* Slave Configuration */
+    spiMaster,      /* Master Configuration */
+} Spi_DeviceMode;
+
+/* BR */
+typedef enum
+{
+    pclkDivBy2 = 0,
+    pclkDivBy4,
+    pclkDivBy8,
+    pclkDivBy16,
+    pclkDivBy32,
+    pclkDivBy64,
+    pclkDivBy128,
+    pclkDivBy256,
+} Spi_ClockSpeed;
+
+/* SSM */
+typedef enum
+{
+    swMgtDisabled = 0,  /* SW Slave Mgt disabled */
+    swMgtEnabled,       /* SW Slave Mgt enabled */
+} Spi_SoftwareSlaveMgt;
+
+/* DFF */
+typedef enum
+{
+    oneByte = 0,    /* 8-bit Frame */
+    twoBytes,       /* 16-bit Frame */
+} Spi_DataFormat;
+
+/* BIDIOE */
+typedef enum
+{
+    outDisabled = 0,    /* Output Disabled (receive-only mode) */
+    outEnabled,         /* Output Enabled (transmit-only mode) */
+} Spi_BidiOutputEnable;
+
+/* BIDIMODE */
+typedef enum
+{
+    twoLineUni = 0, /* Two-Line Unidirectional Mode */
+    oneLineBi,      /* One-Line Bidirectional Mode */
+} Spi_BidirectionalMode;
+
+/***********************  SPI CR2 Related Definitions  ***********************/
 typedef union Spi_Cfg2RegType_Tag
 {
     uint8_t Bytes;
@@ -71,88 +136,48 @@ typedef union Spi_Cfg2RegType_Tag
     } Fields;
 } Spi_Cfg2RegType;
 
-/* BIDIMODE */
+/* TXEIE, RXNEIE, ERRIE */
 typedef enum
 {
-    twoLineUni = 0, /* Two-Line Unidirectional Mode */
-    oneLineBi,      /* One-Line Bidirectional Mode */
-} Spi_BidirectionalMode;
+    interruptDisabled = 0,  /* Will not fire an ISR request */
+    interruptEnabled        /* Will fire an ISR request when Flag is set */
+} Spi_InterruptState;
 
-/* BIDIOE */
+/* FRF */
 typedef enum
 {
-    outDisabled = 0,    /* Output Disabled (receive-only mode) */
-    outEnabled,         /* Output Enabled (transmit-only mode) */
-} Spi_BidiOutputEnable;
+    MotorolaMode = 0,   /* SPI Motorola Mode */
+    TexasInstMode       /* SPI TI Mode */
+} Spi_FrameFormat;
 
-/* DFF */
+/* TXDMAEN, RXDMAEN */
 typedef enum
 {
-    oneByte = 0,    /* 8-bit Frame */
-    twoBytes,       /* 16-bit Frame */
-} Spi_DataFormat;
+    DMASupportDisable = 0,  /* Tx/Rx Buffer DMA disabled */
+    DMASupportEnable        /* Tx/Rx Buffer DMA enabled */
+} Spi_DMASupport;
 
-/* SSM */
+/* Interrupt related type, used to enable or disable ERRIE, RXNE and TXE */
 typedef enum
 {
-    swMgtDisabled = 0,  /* SW Slave Mgt disabled */
-    swMgtEnabled,       /* SW Slave Mgt enabled */
-} Spi_SoftwareSlaveMgt;
+    ERR_Flag    = SPI_CR2_ERRIE,    /* Error Interrupt Enable */
+    RXNE_Flag   = SPI_CR2_RXNEIE,   /* Rx-Buffer Not Empty Interrupt Enable */
+    TXE_Flag    = SPI_CR2_TXEIE     /* Tx-Buffer Empty Interrupt Enable */  
+} Spi_InterruptFlag;
 
-/* BR */
-typedef enum
-{
-    pclkDivBy2 = 0,
-    pclkDivBy4,
-    pclkDivBy8,
-    pclkDivBy16,
-    pclkDivBy32,
-    pclkDivBy64,
-    pclkDivBy128,
-    pclkDivBy256,
-} Spi_ClockSpeed;
-
-/* MSTR */
-typedef enum
-{
-    spiSlave = 0,   /* Slave Configuration */
-    spiMaster,      /* Master Configuration */
-} Spi_DeviceMode;
-
-/* CPOL */
-typedef enum
-{
-    clkPolLowIdle = 0, /* Clock to 0 when idle */
-    clkPolHighIdle,      /* Clock to 1 when idle */
-} Spi_ClockPolarity;
-
-/* CPHA */
-typedef enum
-{
-    firstEdge = 0,  /* Data Capture: First clock transition */
-    secondEdge,     /* Data Capture: Second clock transition */
-} Spi_ClockPhase;
-
-typedef enum
-{
-    fullDuplex = 0,
-    halfDuplex,
-    simplexRx,
-    simplexTx,
-} Spi_BusConfig;
-
+/************************ SPI SR Related Definitions *************************/
 /* Status Register Flags */
 typedef enum
 {
-    RXNE_Flag   = SPI_SR_RXNE,
-    TXE_Flag    = SPI_SR_TXE,
-    CHSIDE_Flag = SPI_SR_CHSIDE,
-    UDR_Flag    = SPI_SR_UDR,
-    CRCERR_Flag = SPI_SR_CRCERR,
-    MODF_Flag   = SPI_SR_MODF,
-    OVR_Flag    = SPI_SR_OVR,
-    BSY_Flag    = SPI_SR_BSY,
-    FRE_Flag    = SPI_SR_FRE
+    RXNE_Flag   = SPI_SR_RXNE,      /* Receive buffer Not Empty */
+    TXE_Flag    = SPI_SR_TXE,       /* Transmit buffer Empty */
+    CHSIDE_Flag = SPI_SR_CHSIDE,    /* Channel side */
+    UDR_Flag    = SPI_SR_UDR,       /* Underrun flag */
+    CRCERR_Flag = SPI_SR_CRCERR,    /* CRC Error flag */
+    MODF_Flag   = SPI_SR_MODF,      /* Mode fault */
+    OVR_Flag    = SPI_SR_OVR,       /* Overrun flag */
+    BSY_Flag    = SPI_SR_BSY,       /* Busy flag */
+    FRE_Flag    = SPI_SR_FRE        /* Frame format error flag */
 } Spi_StatusFlag;
 
 /******************************************************************************
@@ -179,13 +204,13 @@ uint16_t Spi_SendReceiveData(SPI_TypeDef *pSpiHandle, uint16_t TxBuff);
  * @details		   	Returns if either the flag is set or nor set, based on the
  *                  flag value given by the user.
  * @param[in]      	pSpiHandle  SPI Data Structure, holds Status Register.
- * @param[in]       flag        Flag to be tested. Possible values. Use values
+ * @param[in]       flag        Flag to be tested. Possible values: use values
  *                              from Spi_StatusFlag type.
  * @return         	flagStatus  Flag is set or not set.
  ******************************************************************************/
 __STATIC_INLINE uint8_t Spi_GetFlagStatus(SPI_TypeDef *pSpiHandle, Spi_StatusFlag flag)
 {
-    Spi_StatusFlag flagStatus = SPI_FLAG_NOT_SET;
+    uint8_t flagStatus = SPI_FLAG_NOT_SET;
     if(flag == (pSpiHandle->SR & flag))
     {
         flagStatus = SPI_FLAG_SET;
@@ -194,9 +219,35 @@ __STATIC_INLINE uint8_t Spi_GetFlagStatus(SPI_TypeDef *pSpiHandle, Spi_StatusFla
 }
 
 /*!****************************************************************************
- * @brief			Writes content to Data Register.
- * @details		   	Writes content to Data Register based of the input given by
- *                  the user. Useful during Full-Duplex configuration.
+ * @brief			Enables Interrupt depending on input.
+ * @details		   	Sets the interrupt based on the input given.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Control Register 2.
+ * @param[in]       flag        Flag to be tested. Possible values: Use values
+ *                              from Spi_InterruptFlag type.
+ * @return         	flagStatus  Flag is set or not set.
+ ******************************************************************************/
+__STATIC_INLINE void Spi_SetInterruptFlag(SPI_TypeDef *pSpiHandle, Spi_InterruptFlag flag)
+{
+    pSpiHandle->CR2 |= flag;
+}
+
+/*!****************************************************************************
+ * @brief			Disables Interrupt depending on input.
+ * @details		   	Disables the interrupt based on the input given.
+ * @param[in]      	pSpiHandle  SPI Data Structure, holds Status Register.
+ * @param[in]       flag        Flag to be tested. Possible values. Use values
+ *                              from Spi_InterruptFlag type.
+ * @return         	flagStatus  Flag is set or not set.
+ ******************************************************************************/
+__STATIC_INLINE void Spi_ClearInterruptFlag(SPI_TypeDef *pSpiHandle, Spi_InterruptFlag flag)
+{
+    pSpiHandle->CR2 &= ~(uint32_t)(flag);
+}
+
+/*!****************************************************************************
+ * @brief			Writes content to SPI's Data Register.
+ * @details		   	Writes content to SPI's Data Register based of the input 
+ *                  given by the user. Useful during Full-Duplex configuration.
  * @param[in]      	pSpiHandle  SPI Data Structure, holds Data Register (which
  *                              is connected to Tx Buffer).
  * @return         	void        No output parameters.
