@@ -43,11 +43,18 @@ DEFINITION OF CONSTANTS
 /* I2C FLTR offset */
 #define I2C_FLTR_OFFSET	    (0x24u)
 
+/* Maximum APB1 Frequency - 45 MHz. I2C's are connected to APB1 Bus.
+Minimum is 2 MHz, maximum is 45 MHz and intrinsic maximum is 50 MHz. */
+#define I2C_PERICLKFREQ     (45u)
+
+#define I2C_STATIC_CLKFREQ  TRUE
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
 
 /***********************  I2C CR1 Related Definitions  ***********************/
+typedef uint8_t i2c_peripheralClkFreq;
+
 typedef enum
 {
 	i2c1 = 0,
@@ -168,7 +175,18 @@ __STATIC_INLINE void i2c_PeripheralRst(i2c_peripheralNum peripheral)
     I2CX_CR1(peripheral) &= ~(uint32_t)(I2C_CR1_SWRST);
 }
 
-
+#if  (I2C_STATIC_CLKFREQ != TRUE)
+__STATIC_INLINE void i2c_PeripheralClkFreq(i2c_peripheralNum peripheral, 
+                                           i2c_peripheralClkFreq clkFreq)
+{
+    I2CX_CR2(peripheral) |= (clkFreq && I2C_CR2_FREQ);
+}
+#else
+__STATIC_INLINE void i2c_PeripheralClkFreq(i2c_peripheralNum peripheral)
+{
+    I2CX_CR2(peripheral) |= (I2C_PERICLKFREQ && I2C_CR2_FREQ);
+}
+#endif
 
 /******************************************************************************
 End Of File
