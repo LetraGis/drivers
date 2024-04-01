@@ -25,7 +25,7 @@ DEFINITION OF CONSTANTS
 
 /* Number of elements to be substracted from length counter when transmitting
 or receiving DFF's of two bytes of data over SPI. */
-#define DFF_TWO_BYTES   2u
+#define DFF_TWO_BYTES   2u  /* TODO: naming change, add prefix SPI_ */
 
 /* Spi_GetFlagStatus Return values */
 #define SPI_FLAG_NOT_SET    0u

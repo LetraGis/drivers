@@ -81,7 +81,7 @@ DEFINITION OF CONSTANTS
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
-
+/* TODO: add description to types */
 typedef uint16_t Gpio_lockMask;
 typedef enum
 {
@@ -181,7 +181,8 @@ DECLARATION OF CONSTANT DATA
 /******************************************************************************
 DECLARATION OF FUNCTIONS
 ******************************************************************************/
-
+/* TODO: remove dynamic checks for error in input parameters and make them
+all in-line functions. */
 void Gpio_Init(void);
 void Gpio_InitCallback(void); /* Needs to be defined by the user to initialize
 								 GPIO ports, set pin modes, etc. */
