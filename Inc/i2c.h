@@ -45,9 +45,18 @@ DEFINITION OF CONSTANTS
 
 /* Maximum APB1 Frequency - 45 MHz. I2C's are connected to APB1 Bus.
 Minimum is 2 MHz, maximum is 45 MHz and intrinsic maximum is 50 MHz. */
-#define I2C_PERICLKFREQ     (45u)
+#define I2C_PERICLKFREQ_45MHZ   (45u)
 
 #define I2C_STATIC_CLKFREQ  TRUE
+
+/* Spi_GetFlagStatus Return values */
+#define I2C_FLAG_NOT_SET    0u
+#define I2C_FLAG_SET        1u
+
+#define I2C_TIM_SCL_RISE       (1000u)
+#define I2C_TIM_SCL_CLK_HIGH   (4000u)
+#define I2C_TIM_HIGH           (I2C_TIM_SCL_RISE + I2C_TIM_SCL_CLK_HIGH)
+
 /******************************************************************************
 DECLARATION OF TYPES
 ******************************************************************************/
@@ -73,6 +82,54 @@ typedef enum
     i2c_disabled = 0,   /* Disables i2c peripheral */
     i2c_enabled         /* Enables i2c peripheral */
 } i2c_peripheralCtrl;
+
+/***********************  I2C OAR1 Related Definitions  **********************/
+typedef enum
+{
+    i2c_7bitAddr = 0,   /* Disables i2c peripheral */
+    i2c_10bitAddr       /* Enables i2c peripheral */
+} i2c_slaveAddrMode;
+
+/***********************  I2C DR Related Definitions  ************************/
+typedef uint8_t i2c_data;
+
+/*********************** I2C SR1 Related Definitions  ************************/
+typedef enum
+{
+    SB_flag = I2C_SR1_SB,               /* Start bit. Set when start cond. */
+    ADDR_flag = I2C_SR1_ADDR,           /* Addr. sent (mtr)/matched (slv) */        
+    BTF_flag = I2C_SR1_BTF,             /* Byte transfer finished */
+    ADD10_flag = I2C_SR1_ADD10,         /*  */
+    STOPF_flag = I2C_SR1_STOPF,         /*  */
+    RxNE_flag = I2C_SR1_RXNE,           /*  */
+    TxE_flag = I2C_SR1_TXE,             /*  */
+    BERR_flag = I2C_SR1_BERR,           /*  */
+    ARLO_flag = I2C_SR1_ARLO,           /*  */
+    AF_flag = I2C_SR1_AF,               /*  */
+    OVR_flag = I2C_SR1_OVR,             /*  */
+    PECERR_flag = I2C_SR1_PECERR,       /*  */
+    TIMEOUT_flag = I2C_SR1_TIMEOUT,     /*  */
+    SMBALERT_flag = I2C_SR1_SMBALERT    /*  */
+} i2c_statusFlags1;
+
+/*********************** I2C SR2 Related Definitions  ************************/
+typedef enum
+{
+    MSL_flag = I2C_SR2_MSL,
+    BUSY_flag = I2C_SR2_BUSY,
+    TRA_flag = I2C_SR2_TRA,
+    GENCALL_flag = I2C_SR2_GENCALL,
+    SMBDEFAULT_flag = I2C_SR2_SMBDEFAULT,
+    SMBHOST_flag = I2C_SR2_SMBHOST,
+    DUALF_flag = I2C_SR2_DUALF,
+} i2c_statusFlags2;
+
+/*********************** I2C CCR Related Definitions  ************************/
+typedef enum
+{
+    i2c_standardMode = 0,
+    i2c_fastMode
+} i2c_opMode;
 
 /******************************************************************************
 DECLARATION OF VARIABLES
@@ -126,21 +183,46 @@ DECLARATION OF FUNCTION-LIKE MACROS
 /******************************************************************************
 DECLARATION OF INLINE FUNCTIONS
 ******************************************************************************/
+/* TODO: add header description for API's */
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_PeripheralInit(i2c_peripheralNum peripheral)
 {
     RCC->APB1ENR |= (RCC_APB1ENR_I2C1EN_Msk + peripheral);
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_StartCondition(i2c_peripheralNum peripheral)
 {
     I2CX_CR1(peripheral) |= I2C_CR1_START;
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_StopCondition(i2c_peripheralNum peripheral)
 {
     I2CX_CR1(peripheral) |= I2C_CR1_STOP;
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_AckCtrl(i2c_peripheralNum peripheral, 
                                  i2c_ackCtrl ackCtrl)
 {
@@ -154,6 +236,12 @@ __STATIC_INLINE void i2c_AckCtrl(i2c_peripheralNum peripheral,
     }
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_PeripheralCtrl(i2c_peripheralNum peripheral, 
                                         i2c_peripheralCtrl peripheralCtrl)
 {
@@ -167,6 +255,12 @@ __STATIC_INLINE void i2c_PeripheralCtrl(i2c_peripheralNum peripheral,
     }
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 __STATIC_INLINE void i2c_PeripheralRst(i2c_peripheralNum peripheral)
 {
     I2CX_CR1(peripheral) |= I2C_CR1_SWRST;
@@ -175,6 +269,12 @@ __STATIC_INLINE void i2c_PeripheralRst(i2c_peripheralNum peripheral)
     I2CX_CR1(peripheral) &= ~(uint32_t)(I2C_CR1_SWRST);
 }
 
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
 #if  (I2C_STATIC_CLKFREQ != TRUE)
 __STATIC_INLINE void i2c_PeripheralClkFreq(i2c_peripheralNum peripheral, 
                                            i2c_peripheralClkFreq clkFreq)
@@ -184,9 +284,147 @@ __STATIC_INLINE void i2c_PeripheralClkFreq(i2c_peripheralNum peripheral,
 #else
 __STATIC_INLINE void i2c_PeripheralClkFreq(i2c_peripheralNum peripheral)
 {
-    I2CX_CR2(peripheral) |= (I2C_PERICLKFREQ && I2C_CR2_FREQ);
+    I2CX_CR2(peripheral) |= (I2C_PERICLKFREQ_45MHZ & I2C_CR2_FREQ);
 }
 #endif
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE void i2c_AddrModeCfg(i2c_peripheralNum peripheral, i2c_slaveAddrMode mode)
+{
+    if(i2c_7bitAddr == mode)
+    {
+        I2CX_OAR1(peripheral) &= ~(uint32_t)(I2C_OAR1_ADDMODE);
+    }
+    else
+    {
+        I2CX_OAR1(peripheral) |= I2C_OAR1_ADDMODE;
+    }
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE void i2c_WriteData(i2c_peripheralNum peripheral, i2c_data data)
+{
+    I2CX_DR(peripheral) = data;
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE i2c_data i2c_ReadData(i2c_peripheralNum peripheral)
+{
+    return I2CX_DR(peripheral);
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE void i2c_ReadDataRef(i2c_peripheralNum peripheral, 
+                                     i2c_data *data)
+{
+    *data = I2CX_DR(peripheral);
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE uint8_t i2c_GetStatusFlag_SR1(i2c_peripheralNum peripheral, 
+                                          i2c_statusFlags1 flag)
+{
+    uint8_t flagStatus = I2C_FLAG_NOT_SET;
+    if(flag == (I2CX_SR1(peripheral) & flag))
+    {
+        flagStatus = I2C_FLAG_SET;
+    }
+    return flagStatus;
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE uint8_t i2c_GetStatusFlag_SR2(i2c_peripheralNum peripheral, 
+                                          i2c_statusFlags2 flag)
+{
+    uint8_t flagStatus = I2C_FLAG_NOT_SET;
+    if(flag == (I2CX_SR1(peripheral) & flag))
+    {
+        flagStatus = I2C_FLAG_SET;
+    }
+    return flagStatus;
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE void i2c_OpModeCfg(i2c_peripheralNum peripheral, 
+                                   i2c_opMode mode)
+{
+    if(i2c_standardMode == mode)
+    {
+        I2CX_CCR(peripheral) &= ~(uint32_t)(I2C_CCR_FS);
+    }
+    else
+    {
+        I2CX_CCR(peripheral) |= I2C_CCR_FS;
+    }
+}
+
+/*!****************************************************************************
+ * @brief			
+ * @details		   	
+ * @param[in]      	
+ * @return         	
+ ******************************************************************************/
+__STATIC_INLINE void i2c_ClockCfg(i2c_peripheralNum peripheral, i2c_opMode mode)
+{
+    uint16_t ccr_value;
+
+    /* TODO: to be implemented */
+    I2CX_CCR(peripheral) |= (I2C_CCR_CCR & ccr_value);
+}
+
+/* TODO: Add API's to configure all fields on a register at once, using a mask
+and macros, as follows:
+
+--- This should be defined in configuration file (i2c_cfg.h file) ---
+#define I2C_REG_MASK    ((BIT_0 << BIT_0_POS) |   \
+                         (BIT_1 << BIT_1_POS) |    \ 
+                         (BIT_2 << BIT_2_POS))
+
+--- This can be defined in application level code ---
+uint16_t i2c_reg_mask = I2C_REG_MASK;
+I2C_CfgReg(i2c_reg_mask);
+
+void I2C_CfgReg(uint16_t mask)
+{
+    I2C_Reg = mask;
+}
+
+end of TODO  */
 
 /******************************************************************************
 End Of File
